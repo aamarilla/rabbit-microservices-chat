@@ -1,0 +1,32 @@
+version: '3'
+services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    hostname: rabbitmq
+    volumes:
+      - /var/lib/rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    env_file:
+      - .env
+  # api:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile
+  #   ports:
+  #     - "8000:8000"
+  #   environment:
+  #     - DATABASE_URL=postgres://user:password@db:5432/mydatabase
+  #   depends_on:
+  #     - db
+
+  # db:
+  #   image: postgres:13
+  #   environment:
+  #     - POSTGRES_USER=user
+  #     - POSTGRES_PASSWORD=password
+  #     - POSTGRES_DB=mydatabase
+  #   volumes:
+  #     - db_data:/var/lib/postgresql/data
