@@ -1,31 +1,30 @@
-import { ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-
-import { Repository } from 'typeorm';
+import { ConflictException, Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 
 import { UserEntity } from './user.entity';
 import { NewUserDTO } from './dto/new-user.dto';
 import { ExistingUserDTO } from './dto/existing-user.dto';
 import { JwtService } from '@nestjs/jwt';
+import type { UsersRepositoryInterface } from '@app/shared';
 
 @Injectable()
 export class AuthService {
   constructor(
-    @InjectRepository(UserEntity)private readonly userRepository: Repository<UserEntity>,
-    private readonly jwtService: JwtService)
+    @Inject('UsersRepositoryInterface')
+    private readonly usersRepository: UsersRepositoryInterface,
+    private readonly jwtService: JwtService
+  )
   {}
 
   async getUsers(): Promise<UserEntity[]> {
-    return this.userRepository.find();
+    return this.usersRepository.findAll();
   }
 
   async findByEmail(email:string): Promise<UserEntity|null> {
-    return this.userRepository.findOne(
-      {
-        where: {email}, 
-        select: ['id', 'firstName', 'lastName', 'email', 'password']
-      });
+    return this.usersRepository.findByCondition({
+      where: { email },
+      select: ['id', 'firstName', 'lastName', 'email', 'password'],
+    });
   }
 
   async hashPassword(password: string): Promise<string> {
@@ -38,7 +37,7 @@ export class AuthService {
     const hashedPassword = await this.hashPassword(password);
 
     try {
-      const savedUser = await this.userRepository.save({
+      const savedUser = await this.usersRepository.save({
         firstName, 
         lastName, 
         email, 
