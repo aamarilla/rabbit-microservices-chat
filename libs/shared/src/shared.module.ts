@@ -2,7 +2,6 @@ import { DynamicModule, Module } from '@nestjs/common';
 import { SharedService } from './shared.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ClientProxyFactory, Transport } from '@nestjs/microservices';
-import { AuthGuard } from './auth.guard';
 
 @Module({
   imports: [
@@ -11,15 +10,13 @@ import { AuthGuard } from './auth.guard';
         envFilePath: './.env'
       })
     ],
-  providers: [SharedService, AuthGuard],
-  exports: [SharedService, AuthGuard],
+  providers: [SharedService],
+  exports: [SharedService],
 })
 export class SharedModule {
   static registerRmq(service: string, queue: string):DynamicModule {
-    return {
-      module: SharedModule,
-      providers: [
-        {
+
+    const providers = [{
           provide: service,
           useFactory: (configService: ConfigService) => {
             const USER = configService.get<string>('RABBITMQ_USER');
@@ -38,8 +35,12 @@ export class SharedModule {
               })
           },
           inject: [ConfigService]
-        }
-      ]
+        }];
+
+    return {
+      module: SharedModule,
+      providers,
+      exports: providers,
     }
   }
 }

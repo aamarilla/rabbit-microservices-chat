@@ -1,8 +1,7 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { ClientProxy, ClientProxyFactory, Transport } from '@nestjs/microservices';
+import { ConfigModule } from '@nestjs/config';
 import { SharedModule } from '@app/shared';
 
 @Module({
