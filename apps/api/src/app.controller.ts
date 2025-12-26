@@ -1,6 +1,9 @@
-import { AuthGuard } from '@app/shared';
-import { Body, Controller, Get, Inject, Post, UseGuards } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, Inject, Param, Post, Req, UseGuards, UseInterceptors } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
+
+import { AuthGuard } from '@app/shared';
+import type { UserRequest } from '@app/shared';
+import { UserInterceptor } from '@app/shared/interceptors/user.interceptor';
 
 @Controller()
 export class AppController {
@@ -68,6 +71,47 @@ export class AppController {
     })
   }
 
+  @UseGuards(AuthGuard)
+  @UseInterceptors(UserInterceptor)
+  @Post('add-friend/:friendId')
+  async addFriend(
+    @Req() req: UserRequest,
+    @Param('friendId') friendId: number,
+  ){
+    if(!req.user){
+      throw new BadRequestException('User not found in request');
+    }
+
+    return this.authService.send(
+      {
+        cmd: 'add-friend'
+      },
+      {
+        userId: req.user.id,
+        friendId,
+      });
+  }
+
+  @UseGuards(AuthGuard)
+  @UseInterceptors(UserInterceptor)
+  @Get('get-friends')
+  async getFriends(
+    @Req() req: UserRequest,
+  ){
+    if(!req?.user){
+      throw new BadRequestException('User not found in request');
+    }
+
+    return this.authService.send(
+      {
+        cmd: 'get-friends',
+      },
+      {
+        userId: req.user.id
+      }
+    )
+
+  }
 
 
 }

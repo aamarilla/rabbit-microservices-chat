@@ -1,17 +1,20 @@
-import { ConflictException, Inject, Injectable, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 
-import { UserEntity } from './user.entity';
+import { UserEntity } from '@app/shared';
 import { NewUserDTO } from './dto/new-user.dto';
 import { ExistingUserDTO } from './dto/existing-user.dto';
 import { JwtService } from '@nestjs/jwt';
-import type { UsersRepositoryInterface } from '@app/shared';
+import type { FriendRequestEntity, UserJwt, UsersRepositoryInterface } from '@app/shared';
+import { FriendRequestsRepository } from '@app/shared/repositories/friend-request.repository';
 
 @Injectable()
 export class AuthService {
   constructor(
     @Inject('UsersRepositoryInterface')
     private readonly usersRepository: UsersRepositoryInterface,
+    @Inject('FriendRequestsRepositoryInterface')
+    private readonly friendRequestsRepository: FriendRequestsRepository,
     private readonly jwtService: JwtService
   )
   {}
@@ -84,7 +87,7 @@ export class AuthService {
   }
 
   async login(existingUser: Readonly<ExistingUserDTO>)
-  :Promise<{token: string}> {
+  :Promise<{token: string, user: Omit<UserEntity, 'password'>}> {
     const { email, password } = existingUser;
     const user = await this.validateUser(password, email);
 
@@ -97,7 +100,8 @@ export class AuthService {
     );
 
     return {
-      token: jwt
+      token: jwt,
+      user
     }
   }
 
@@ -111,6 +115,46 @@ export class AuthService {
     } catch (e) {
       throw new UnauthorizedException();
     }
+  }
+
+  async findById(id: number): Promise<UserEntity|null> {
+    return this.usersRepository.findOneById(id);
+  }
+
+  async getUserFromHeader(jwt: string): Promise<UserJwt> {
+    if(!jwt){
+      throw new UnauthorizedException();
+    }
+
+    try{
+      return this.jwtService.decode(jwt) as UserJwt;
+    } catch (e){
+      throw new BadRequestException();
+    }
+  }
+
+  async addFriend(
+    userId: number,
+    friendId: number,
+  ): Promise<FriendRequestEntity>{
+    const creator = await this.findById(userId) as UserEntity;
+    const receiver = await this.findById(friendId) as UserEntity;
+
+    return await this.friendRequestsRepository.save({
+      creator,
+      receiver
+    })
+  }
+
+  async getFriends(userId: number)
+  :Promise<FriendRequestEntity[]>{
+    const creator = await this.findById(userId) as UserEntity;
+
+    return await this.friendRequestsRepository.findWithRelations
+    ({
+      where: [{creator},{receiver: creator}],
+      relations: ['creator', 'receiver']
+    })
   }
 
   
