@@ -1,7 +1,8 @@
 import { DynamicModule, Module } from '@nestjs/common';
-import { SharedService } from './shared.service';
+
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ClientProxyFactory, Transport } from '@nestjs/microservices';
+import { SharedService } from '../services/shared.service';
 
 @Module({
   imports: [

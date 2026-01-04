@@ -35,9 +35,7 @@ export class AppController {
   async getPresence() {
     return this.presenceService.send({
       cmd: 'get-presence'
-    },{
-
-    })
+    },{})
   }
 
   @Post('auth/register')
