@@ -1,5 +1,5 @@
 import { Controller, UseInterceptors } from '@nestjs/common';
-import { Ctx, MessagePattern, RmqContext } from '@nestjs/microservices';
+import { Ctx, MessagePattern, Payload, RmqContext } from '@nestjs/microservices';
 
 import { MicroserviceCacheInterceptor, RedisService, SharedService } from '@app/shared';
 
@@ -23,5 +23,15 @@ export class PresenceController {
     this.redisService.set('foo', f);
 
     return f;
+  }
+
+  @MessagePattern({ cmd: 'get-active-user' })
+  async getActiveUser(
+    @Ctx() context: RmqContext,
+    @Payload() payload: { id: number }
+  ) {
+    this.sharedService.acknowledgeMessage(context);
+
+    return await this.presenceService.getActiveUser(payload.id);
   }
 }

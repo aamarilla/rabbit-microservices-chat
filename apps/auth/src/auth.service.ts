@@ -157,6 +157,23 @@ export class AuthService {
     })
   }
 
+  async getFriendsList(userId: number) {
+    const friendRequests = await this.getFriends(userId);
+
+    if(!friendRequests) return [];
+
+    const friends = friendRequests.map((friendRequest) => {
+      const isUserCreator = userId === friendRequest.creator.id;
+      const friendDetails = isUserCreator
+        ? friendRequest.receiver
+        : friendRequest.creator;
+
+      const { id, firstName, lastName, email } = friendDetails;
+
+      return { id, firstName, lastName, email };
+    })
+  }
+
   
 }
  

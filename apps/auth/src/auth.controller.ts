@@ -83,4 +83,15 @@ export class AuthController {
     return this.authService.getFriends(payload.userId);
   }
 
+  @MessagePattern({ cmd: 'get-friends-list' })
+  async geetFriendsList(
+    @Ctx() context: RmqContext,
+    @Payload() payload: { userId: number },
+  ) {
+    this.sharedService.acknowledgeMessage(context);
+
+    return this.authService.getFriendsList(payload.userId);
+
+  }
+
 }

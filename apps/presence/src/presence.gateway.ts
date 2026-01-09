@@ -1,5 +1,4 @@
 import { FriendRequestEntity, UserJwt } from "@app/shared";
-import { OnGatewayConnection, OnGatewayDisconnect, SubscribeMessage, WebSocketGateway, WebSocketServer } from "@nestjs/websockets";
 import type { Cache } from "cache-manager";
 import { firstValueFrom } from "rxjs";
 import { Server, Socket } from "socket.io";
@@ -7,6 +6,7 @@ import { ActiveUser } from "./interface/ActiveUser.interface";
 import { Inject } from "@nestjs/common";
 import { CACHE_MANAGER } from "@nestjs/cache-manager";
 import { ClientProxy } from "@nestjs/microservices";
+import { OnGatewayConnection, OnGatewayDisconnect, SubscribeMessage, WebSocketGateway, WebSocketServer } from "@nestjs/websockets";
 
 @WebSocketGateway({ cors:true})
 export class PresenceGateway 
@@ -53,7 +53,7 @@ implements OnGatewayConnection, OnGatewayDisconnect {
     private async emitStatusToFriends(activeUser: ActiveUser){
         const friends = await this.getFriends(activeUser.id);
 
-        for(const f of friends){
+        for(const f of friends!){
             const user = await this.cache.get(`user ${f.id}`);
 
             if(!user) continue;

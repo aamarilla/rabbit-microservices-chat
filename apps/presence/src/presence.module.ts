@@ -5,12 +5,12 @@ import { CacheModule } from '@nestjs/cache-manager';
 
 import { PresenceController } from './presence.controller';
 import { PresenceService } from './presence.service';
-import { PresenceGateway } from './presence.service';
+import { PresenceGateway } from './presence.gateway';
 
 @Module({
   imports: [
-    CacheModule.register(),
-    SharedModule.registerRmq('AUTH_SERVICE', process.env.RABBITMQ_AUTH_QUEUE),
+    RedisModule,
+    SharedModule.registerRmq('AUTH_SERVICE', process.env.RABBITMQ_AUTH_QUEUE!),
     ConfigModule.forRoot({
             isGlobal: true,
             envFilePath: './.env'
