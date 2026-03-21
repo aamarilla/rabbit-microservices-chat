@@ -15,8 +15,7 @@ import { PresenceGateway } from './presence.gateway';
             isGlobal: true,
             envFilePath: './.env'
           }),
-    SharedModule,
-    RedisModule
+    SharedModule
   ],
   controllers: [PresenceController],
   providers: [PresenceService, PresenceGateway],

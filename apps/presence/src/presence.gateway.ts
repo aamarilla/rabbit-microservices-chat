@@ -19,6 +19,7 @@ implements OnGatewayConnection, OnGatewayDisconnect {
     @WebSocketServer()
     server: Server;
 
+    //REMOVE IN PRODUCTION
     async onModuleInit() {
         await this.cache.clear();
     }
@@ -64,6 +65,13 @@ implements OnGatewayConnection, OnGatewayDisconnect {
                 id: activeUser.id,
                 isActive: activeUser.isActive
             })
+
+            if(activeUser.isActive) {
+                this.server.to(activeUser.socketId).emit('friendActive', {
+                    id: friend.id,
+                    isActive: friend.isActive
+                })
+            }   
         }
     }
 
