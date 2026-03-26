@@ -24,11 +24,19 @@ export class ChatGateway implements OnGatewayConnection,
         server: Server;
 
         async handleDisconnect(socket: Socket) {
-            console.log('HANDLE DISCONNECT - CONVO');
+            const userId = socket.data?.user?.id;
+            console.log('[CHAT GATEWAY] Disconnect:', {
+                socketId: socket.id,
+                userId: userId || 'unknown',
+                timestamp: new Date().toISOString()
+            });
         }
 
         async handleConnection(socket: Socket){
-            console.log('HANDLE CONNECTION - CONVO');
+            console.log('[CHAT GATEWAY] New connection attempt:', {
+                socketId: socket.id,
+                timestamp: new Date().toISOString()
+            });
 
             const jwt = socket.handshake.headers.authorization?? null;
 
@@ -36,6 +44,8 @@ export class ChatGateway implements OnGatewayConnection,
                 this.handleDisconnect(socket);
                 return;
             }
+
+            console.log('[CHAT GATEWAY] JWT found, validating...');
 
             const ob$ = this.authService.send<UserJwt>({
                 cmd: 'decode-jwt'
@@ -86,6 +96,10 @@ export class ChatGateway implements OnGatewayConnection,
             }
 
             await this.cache.set(`conversationUser ${user.id}`, conversationUser);
+            console.log('✅ [CHAT GATEWAY] User cached:', {
+                userId: user.id,
+                socketId: socket.id
+            });
         }
 
         @SubscribeMessage('getConversations')
@@ -102,7 +116,12 @@ export class ChatGateway implements OnGatewayConnection,
 
         @SubscribeMessage('sendMessage')
         async handleMessage(socket: Socket, newMessage: NewMessageDto) {
-            if (!newMessage) return;
+            console.log('💬 [CHAT GATEWAY] sendMessage event received:', {
+                message: newMessage?.message,
+                friendId: newMessage?.friendId,
+                conversationId: newMessage?.conversationId
+            });
+
 
             const { user } = socket.data;
 

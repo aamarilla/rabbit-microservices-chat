@@ -17,11 +17,22 @@ export class AuthController {
     private readonly sharedService: SharedService
   ) {}
 
+
   @MessagePattern({ cmd: 'get-users' })
-  async getUser(@Ctx() context: RmqContext) {
+  async getUsers(@Ctx() context: RmqContext) {
     this.sharedService.acknowledgeMessage(context);
 
     return this.authService.getUsers();
+  }
+
+  @MessagePattern({ cmd: 'get-user' })
+  async getUserById(
+    @Ctx() context: RmqContext,
+    @Payload() user: { id: number },
+  ) {
+    this.sharedService.acknowledgeMessage(context);
+
+    return this.authService.getUserById(user.id);
   }
 
 

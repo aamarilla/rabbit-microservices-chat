@@ -23,6 +23,10 @@ export class AuthService {
     return this.usersRepository.findAll();
   }
 
+  async getUserById(id: number): Promise<UserEntity> {
+    return await this.usersRepository.findOneById(id);
+  }
+
   async findByEmail(email:string): Promise<UserEntity|null> {
     return this.usersRepository.findByCondition({
       where: { email },
