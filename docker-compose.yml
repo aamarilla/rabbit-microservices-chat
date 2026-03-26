@@ -46,11 +46,11 @@ services:
   chat:
     build:
       context: ./
-      dockerfile: ./apps/presence/Dockerfile
+      dockerfile: ./apps/chat/Dockerfile
     env_file:
       - .env
     ports:
-      - "7000:7000"
+      - "9999:9999"
     depends_on:
       - rabbitmq
       - postgres
